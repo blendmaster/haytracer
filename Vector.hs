@@ -4,9 +4,20 @@ Author: Steven Ruppert
 For CSCI441: Computer Graphics, Fall 2012
 -}
 
+module Vector
+( Scalar(..)
+, Vector(..)
+, Point(..)
+, dot
+, cross
+, magnitude
+, normal
+) where
+
 type Scalar = Double -- should it be Num or something?
 
 data Vector = Vector Scalar Scalar Scalar deriving (Show, Eq, Ord)
+type Point = Vector -- points are just vectors from the origin
 
 {-instance Num Vector where-}
   {-(Vector a1 a2 a3) + (Vector b1 b2 b3) = Vector (a1 + b1)-}
