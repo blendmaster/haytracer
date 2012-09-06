@@ -58,18 +58,28 @@ intersection (Ray o d) (Sphere center r _) =
 
       det = b ** 2 - 4 * a * c
 
-      point_from t = Just (o + d ^* t)
+      point_from t = Just (o + d ^* t) -- convenience for Maybe constructor
       choose_from t1 t2
-        | t1 < 0 && t2 < 0 = Nothing
-        | t1 > 0 && t2 < 0 = point_from t1
+        | t1 < 0 && t2 < 0 = Nothing       -- sphere is 'behind' ray
+        | t1 > 0 && t2 < 0 = point_from t1 -- ray starts inside sphere
         | t2 < 0 && t2 > 0 = point_from t2
-        | otherwise        = if t1 < t2 then point_from t1
+        | otherwise        = if t1 < t2 then point_from t1 -- choose nearest
                                         else point_from t2
-  in if det < 0 then Nothing
+  in if det < 0 then Nothing -- no intersections at all
                 else choose_from (((-b) + sqrt det) / (2 * a))
                                  (((-b) - sqrt det) / (2 * a))
 
-intersection (Ray o d) (Triangle v1 v2 v3 _) = Nothing -- TODO
+intersection (Ray o d) (Triangle v1 v2 v3 _) =
+  let n = normal $ (v2 - v1) `cross` (v3 - v1) -- normal to triangle's plane
+      t = ((o - v1) `dot` n) / (d `dot` n)     -- intersection of ray/plane
+      p = o + d ^* t                           -- point of intersection
+  -- if all three crossproducts are in the same direction as n
+  -- then p is inside the triangle on its plane
+  in if ((v2 - v1) `cross` (p - v1)) `dot` n >= 0 &&
+        ((v3 - v2) `cross` (p - v2)) `dot` n >= 0 &&
+        ((v1 - v3) `cross` (p - v3)) `dot` n >= 0
+     then Just p
+     else Nothing
 
 -- the closest intersection (to the origin) between a primitive in the world
 -- and a ray, or Nothing if there is no such intersection
