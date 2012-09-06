@@ -21,6 +21,7 @@ data Vector = Vector Scalar Scalar Scalar deriving (Show, Eq, Ord)
 type Point = Vector -- points are just vectors from the origin
 
 -- vector times scalar, think of ^ as a vector hat
+-- due to the way (*) is defined, I can't overload it with disparate types
 (Vector a1 a2 a3) ^* b = Vector (a1 * b)
                                 (a2 * b)
                                 (a3 * b)
@@ -38,13 +39,13 @@ magnitude (Vector a1 a2 a3) = sqrt (a1 ** 2 + a2 ** 2 + a3 ** 2)
 normal v@(Vector a1 a2 a3) = Vector (a1 / m) (a2 / m) (a3 / m)
                              where m = magnitude v
 
--- overload operators as necessary
--- is undefined bad?
+-- kind of a hack to overload - and + for vectors. Since + and - takes
+-- the Num typeclass, make other required methods undefined.
 instance Num Vector where
   (Vector a1 a2 a3) + (Vector b1 b2 b3) = Vector (a1 + b1)
                                                  (a2 + b2)
                                                  (a3 + b3)
-  (*) = undefined -- `dot` and `cross` are just fine
+  (*) = undefined
   (Vector a1 a2 a3) - (Vector b1 b2 b3) = Vector (a1 - b1)
                                                  (a2 - b2)
                                                  (a3 - b3)
