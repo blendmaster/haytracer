@@ -7,6 +7,15 @@ For CSCI441: Computer Graphics, Fall 2012
 import Vector
 import Data.List
 
+module World
+( Color(..)
+, Material(..)
+, Primitive(..)
+, World(..)
+, Ray(..)
+, pixels
+) where
+
 data Color = Color { red, blue, green :: Scalar } deriving (Show, Eq, Ord)
 
 data Material = Material { diffuse :: Color
