@@ -4,9 +4,6 @@ Author: Steven Ruppert
 For CSCI441: Computer Graphics, Fall 2012
 -}
 
-import Vector
-import Data.List
-
 module World
 ( Color(..)
 , Material(..)
@@ -15,6 +12,9 @@ module World
 , Ray(..)
 , pixels
 ) where
+
+import Vector
+import Data.List
 
 data Color = Color { red, blue, green :: Scalar } deriving (Show, Eq, Ord)
 
