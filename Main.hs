@@ -82,8 +82,6 @@ main = do
   input <- readFile infile
   putStrLn "Rendering to output.ppm..."
   let (w:h:rest) = words input
-  putStrLn $ show rest
-  let world = parse_world rest
-  putStrLn $ "world: \n" ++ show world
+      world = parse_world rest
   writeFile "output.ppm" (ppm (pixels world (read w) (read h)))
   putStrLn "done!"
