@@ -106,16 +106,19 @@ first_intersection ray primitives =
 
 -- The ray point from the viewpoint to the center of the x,yth pixel of
 -- the width x height pixels of the rendered view
+-- x,y are offset from the top-left (image pixel coordinates)
 pixel_ray :: World -> Int -> Int -> Int -> Int -> Ray
 pixel_ray world width height x y =
   let e = viewpoint world
-      l = screen_origin world
+      o = screen_origin world
       v = screen_vertical world
       h = screen_horizontal world
       fi = fromIntegral
+      dx = h ^* (((fi x) + 0.5 ) / (fi width))
+      -- must transform from top-left pixel coords to bottom-left origin
+      dy = v ^* (((fi height - 1) - (fi y) + 0.5 ) / (fi height))
   in Ray { origin    = e
-         , direction = ((l + h ^* (((fi x) + 0.5) / (fi width))) +
-                        (l + v ^* (((fi y) + 0.5) / (fi height)))) - e
+         , direction = normal $ o + dx + dy - e
          }
 
 -- The pixels of a World rendered into width x height pixels
@@ -127,6 +130,6 @@ pixels world width height =
      in case first_intersection ray (primitives world) of
        Nothing        -> Color 0 0 0 -- background
        Just (prim, _) -> ambient . material $ prim
-  | y <- [0..(height - 1)]]
   | x <- [0..(width - 1)]]
+  | y <- [0..(height - 1)]]
 
