@@ -80,15 +80,17 @@ intersection (Ray o d) (Sphere center r _) =
 
 intersection (Ray o d) (Triangle v1 v2 v3 _) =
   let n = normal $ (v2 - v1) `cross` (v3 - v1) -- normal to triangle's plane
-      t = ((o - v1) `dot` n) / (d `dot` n)     -- intersection of ray/plane
-      p = o + d ^* t                           -- point of intersection
-  -- if all three crossproducts are in the same direction as n
-  -- then p is inside the triangle on its plane
-  in if ((v2 - v1) `cross` (p - v1)) `dot` n >= 0 &&
-        ((v3 - v2) `cross` (p - v2)) `dot` n >= 0 &&
-        ((v1 - v3) `cross` (p - v3)) `dot` n >= 0
-     then Just (p, t)
-     else Nothing
+  in if n `dot` d == 0
+     then Nothing
+     else let t = (v1 `dot` n - n `dot` o) / (n `dot` d)
+              p = o + d ^* t                             -- point of intersection
+          -- if all three crossproducts are in the same direction as n
+          -- then p is inside the triangle on its plane
+          in if (((v2 - v1) `cross` (p - v1)) `dot` n) >= 0 &&
+                (((v3 - v2) `cross` (p - v2)) `dot` n) >= 0 &&
+                (((v1 - v3) `cross` (p - v3)) `dot` n) >= 0
+             then Just (p, t)
+             else Nothing
 
 -- The first shape and the point at which a given ray intersects a list of
 -- primitives, or Nothing if there is no intersection
