@@ -77,11 +77,13 @@ ppm pixels =
     "P3\n" ++ width ++ " " ++ height ++ " 255\n" ++ channels
 
 main = do
-  (infile:_) <- getArgs
+  args <- getArgs
+  let infile = if length args >= 1 then args !! 0 else "input.txt"
+      outfile = if length args == 2 then args !! 1 else "output.ppm"
   putStrLn $ "Reading " ++ infile ++ "..."
   input <- readFile infile
-  putStrLn "Rendering to output.ppm..."
+  putStrLn $ "Rendering to " ++ outfile ++ "..."
   let (w:h:rest) = words input
       world = parse_world rest
-  writeFile "output.ppm" (ppm (pixels world (read w) (read h)))
+  writeFile outfile (ppm (pixels world (read w) (read h)))
   putStrLn "done!"
