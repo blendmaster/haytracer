@@ -123,15 +123,41 @@ pixel_ray world width height x y =
          , direction = normal $ o + dx + dy - e
          }
 
+-- The color of a point on a primitive within the world
+lighting :: World -> Primitive -> Point -> Color
+lighting world primitive point =
+  let m                   = material primitive
+      (Color kdr kdg kdb) = diffuse m
+      (Color adr adg adb) = ambient m
+      ks                  = specular_coef m
+      exp                 = specular_exp m
+      ia                  = ambient_intensity world
+      i                   = light_intensity world
+
+      n = normal $ case primitive of
+        (Sphere c _ _)        -> point - c
+        (Triangle v1 v2 v3 _) -> let n =(v2 - v1) `cross` (v3 - v1)
+                                 in if n `dot` ((viewpoint world) - v1) >= 0
+                                    then n  -- use the normal pointing towards
+                                    else -n -- the viewer (thin triangle)
+      l = normal $ (light_source world) - point
+      v = normal $ (viewpoint world) - point
+      h = normal $ v + l
+      d = magnitude $ (light_source world) - point
+
+      dotmin0 a b = max 0 $ a `dot` b -- clamp dot products to be positive
+      i_tot kd ka =
+        i * (kd * (n `dotmin0` l) + ks * (h `dotmin0` n) ** exp) + ka * ia
+  in
+    Color (i_tot kdr adr) (i_tot kdg adg) (i_tot kdb adb)
+
 -- The pixels of a World rendered into width x height pixels
--- Simply uses the ambient color of the material of the primitive
--- TODO lighting and shading and stuff
 pixels :: World -> Int -> Int -> [[Color]]
 pixels world width height =
   [[ let ray = pixel_ray world width height x y
      in case first_intersection ray (primitives world) of
        Nothing        -> Color 0 0 0 -- background
-       Just (prim, _) -> ambient . material $ prim
+       Just (primitive, point) -> lighting world primitive point
   | x <- [0..(width - 1)]]
   | y <- [0..(height - 1)]]
 
