@@ -136,7 +136,7 @@ lighting world primitive point =
 
       n = normal $ case primitive of
         (Sphere c _ _)        -> point - c
-        (Triangle v1 v2 v3 _) -> let n =(v2 - v1) `cross` (v3 - v1)
+        (Triangle v1 v2 v3 _) -> let n = (v2 - v1) `cross` (v3 - v1)
                                  in if n `dot` ((viewpoint world) - v1) >= 0
                                     then n  -- use the normal pointing towards
                                     else -n -- the viewer (thin triangle)
@@ -145,9 +145,16 @@ lighting world primitive point =
       h = normal $ v + l
       d = magnitude $ (light_source world) - point
 
-      dotmin0 a b = max 0 $ a `dot` b -- clamp dot products to be positive
+      shadow_ray = Ray { origin = point, direction = l }
+      other_primitives = filter (/= primitive) (primitives world)
+      in_shadow = (n `dot` l) < 0 ||
+                  Nothing /= (first_intersection shadow_ray other_primitives)
+
       i_tot kd ka =
-        i * (kd * (n `dotmin0` l) + ks * (h `dotmin0` n) ** exp) + ka * ia
+        if in_shadow then
+          ka * ia
+        else
+          i * (kd * (n `dot` l) + ks * (h `dot` n) ** exp) + ka * ia
   in
     Color (i_tot kdr adr) (i_tot kdg adg) (i_tot kdb adb)
 
@@ -156,7 +163,7 @@ pixels :: World -> Int -> Int -> [[Color]]
 pixels world width height =
   [[ let ray = pixel_ray world width height x y
      in case first_intersection ray (primitives world) of
-       Nothing        -> Color 0 0 0 -- background
+       Nothing                 -> Color 0 0 0 -- background
        Just (primitive, point) -> lighting world primitive point
   | x <- [0..(width - 1)]]
   | y <- [0..(height - 1)]]
