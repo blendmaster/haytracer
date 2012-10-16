@@ -143,7 +143,6 @@ lighting world primitive point =
       l = normal $ (light_source world) - point
       v = normal $ (viewpoint world) - point
       h = normal $ v + l
-      d = magnitude $ (light_source world) - point
 
       shadow_ray = Ray { origin = point, direction = l }
       other_primitives = filter (/= primitive) (primitives world)
