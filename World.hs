@@ -148,8 +148,8 @@ lighting world primitive point =
 
       shadow_ray = Ray { origin = point, direction = l }
       other_primitives = filter (/= primitive) (primitives world)
-      in_shadow = (n `dot` l) < 0 ||
-                  Nothing /= (first_intersection shadow_ray other_primitives)
+      in_shadow = (n `dot` l) < 0
+                  || Nothing /= (first_intersection shadow_ray other_primitives)
 
       i_tot kd ka =
         if in_shadow then
